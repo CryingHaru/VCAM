@@ -1,0 +1,52 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build & Package iOS IPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Check Flutter environment
+        run: flutter doctor -v
+
+      - name: Install dependencies
+        run: |
+          cd client
+          flutter pub get
+
+      - name: Build iOS Application
+        run: |
+          cd client
+          flutter build ios --release --no-codesign
+
+      - name: Package IPA
+        run: |
+          cd client/build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r -q VCAM.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VCAM-iOS-IPA
+          path: client/build/ios/iphoneos/VCAM.ipa
+          if-no-files-found: error
+          retention-days: 14
+
