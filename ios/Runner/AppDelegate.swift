@@ -14,7 +14,9 @@ import Photos
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
-    let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "VcamGalleryPlugin")
+    guard let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "VcamGalleryPlugin") else {
+      return
+    }
     let channel = FlutterMethodChannel(name: "com.example.vcam/gallery", binaryMessenger: registrar.messenger())
 
     channel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
